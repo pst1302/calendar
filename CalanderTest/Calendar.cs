@@ -731,7 +731,7 @@ namespace Calendar.NET
         {
             if (!_showEventTooltips)
                 return;
-            
+            //
 
             // 모든 데이타박스 검색
             for (int i = 0; i < dateBoxes.Count; i++)
