@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Drawing;
 using System.Drawing.Drawing2D;
 using System.Globalization;
@@ -113,9 +114,9 @@ namespace Calendar.NET
         /// </summary>
         string EventText { get; set; }
 
-        string WorkTime { get; set; }
+        string startTime { get; set; }
 
-        string WorkType { get; set; }
+        string endTime { get; set; }
 
         string etc { get; set; }
         /// <summary>
@@ -177,10 +178,10 @@ namespace Calendar.NET
     {
         #region 변수 선언부
 
-        
+
         private DateTime _calendarDate;                 // 현재 날짜
         private Font _dayOfWeekFont;                    // 각종 폰트
-        private Font _daysFont;                         
+        private Font _daysFont;
         private Font _todayFont;
         private Font _dateHeaderFont;
         private Font _dayViewTimeFont;
@@ -195,14 +196,14 @@ namespace Calendar.NET
         private bool _loadPresetHolidays;               // Hollyday 표시 여부 
         private cEvent _cEvent;                         // 이벤트 
         private bool _showDisabledEvents;               // 이벤트 표시 여부
-        private bool _showDashedBorderOnDisabledEvents; 
-        private bool _dimDisabledEvents;                
+        private bool _showDashedBorderOnDisabledEvents;
+        private bool _dimDisabledEvents;
         private bool _highlightCurrentDay;              // 오늘 날짜에 Highlight를 줄지 여부
         private CalendarViews _calendarView;            // 달력 표시 종류 일별로 보려면 Day 월별로 보려면 Month로, 우리는 Month만 봄
         private readonly ScrollPanel _scrollPanel;      // ScrollPanel
 
         private readonly List<IEvent> _events;                  // 이벤트를 담아두는 함수
-        private readonly List<Rectangle> _rectangles;           
+        private readonly List<Rectangle> _rectangles;
         private readonly Dictionary<int, Point> _calendarDays;
         private readonly List<cEvent> _cEvents;
         private ContextMenuStrip _contextMenuStrip1;
@@ -620,14 +621,14 @@ namespace Calendar.NET
 
         private void Calendar_MouseHover(object sender, EventArgs e)
         {
-            
+
         }
 
         private void Calendar_Click(object sender, EventArgs e)
         {
-            
+
         }
-        
+
         // > 모양의 버튼을 눌렀을때의 클릭 이벤트
         private void _rightBtn_Click(object sender, EventArgs e)
         {
@@ -658,10 +659,6 @@ namespace Calendar.NET
             Refresh();
         }
 
-        
-
-
-
         /// <summary>
         /// Adds an event to the calendar
         /// </summary>
@@ -677,12 +674,14 @@ namespace Calendar.NET
         /// </summary>
         /// <param name="Text"> 근무 내용</param>
         /// <param name="Date"> 근무 시간</param>
-        public void AddWork(String workType, String workTime, String etc,DateTime Date)
+        public void AddWork(String startTime, String endTime, String etc, DateTime Date)
         {
+            bool existEvent = false;            // 하루에 근무시간은 한번 있어야함. 이를 판단하기 위해 존재하는 변수
+
             var ce = new CustomEvent();
             ce.IgnoreTimeComponent = false;
-            ce.WorkType = workType;
-            ce.WorkTime = workTime;
+            ce.startTime = startTime;
+            ce.endTime = endTime;
             ce.etc = etc;
             ce.Date = Date;
             ce.EventLengthInHours = 2f;
@@ -692,8 +691,91 @@ namespace Calendar.NET
             ce.TooltipEnabled = false;
             ce.EventColor = Color.FromArgb(255, 255, 255, 255);
             ce.EventTextColor = Color.Black;
-            _events.Add(ce);
+
+            for(int i = 0;i < _events.Count; i++)
+            {
+                if (_events[i].Date.Year == _calendarDate.Year && _events[i].Date.Month == _calendarDate.Month
+                    && _events[i].Date.Day == Date.Day)
+                {
+                    _events[i] = ce;
+                    existEvent = true;
+                }
+                
+            }
+
+            if (!existEvent)            // 해당 날짜에 이벤트가 존재하면 추가하지 않는다.
+                _events.Add(ce);
+
             Refresh();
+        }
+
+        /// <summary>
+        /// 하루 일 시작 시간을 입력합니다.
+        /// </summary>
+        /// <param name="startTime"></param>
+        /// <param name="Date"></param>
+        public void AddWorkStartTime(String startTime, DateTime Date)
+        {
+            for(int i = 0;i < _events.Count; i++)
+            {
+                if(_events[i].Date.Year == _calendarDate.Year && _events[i].Date.Month == _calendarDate.Month
+                    && _events[i].Date.Day == Date.Day)
+                {
+                    _events[i].startTime = startTime;
+                    Refresh();
+                    return;
+                }
+            }
+            AddWork(startTime, "", "", Date);
+        }
+
+       /// <summary>
+       /// 근무 마치는 시간을 입력합니다.
+       /// </summary>
+       /// <param name="endTime"></param>
+       /// <param name="Date"></param>
+        public void AddWorkEndTime(String endTime, DateTime Date)
+        {
+            bool existEvent = false;
+
+            for (int i = 0; i < _events.Count; i++)
+            {
+                if (_events[i].Date.Year == _calendarDate.Year && _events[i].Date.Month == _calendarDate.Month
+                    && _events[i].Date.Day == Date.Day)
+                {
+                    existEvent = true;
+                    if (_events[i].startTime == "")         // 시작시간이 입력되지 않을 경우 그냥 종료
+                        return;
+
+                    _events[i].endTime = endTime;
+                    Refresh();
+
+                    return;
+                }
+            }
+            if(existEvent)
+                AddWork("", endTime, "", Date);
+        }
+
+        /// <summary>
+        /// 비고란을 입력합니다.
+        /// </summary>
+        /// <param name="etc"></param>
+        /// <param name="Date"></param>
+        public void AddEtc(String etc, DateTime Date)
+        {
+            for (int i = 0; i < _events.Count; i++)
+            {
+                if (_events[i].Date.Year == _calendarDate.Year && _events[i].Date.Month == _calendarDate.Month
+                    && _events[i].Date.Day == Date.Day)
+                {
+                    
+                    _events[i].etc = etc;
+                    Refresh();
+
+                    return;
+                }
+            }
         }
 
         /// <summary>
@@ -738,22 +820,21 @@ namespace Calendar.NET
             {
                 if (dateBoxes[i].size.Contains(new Point(e.X, e.Y)))
                 {
-                    
                     for (int j = 0; j < _events.Count; j++)
                     {
                         if (dateBoxes[i].date == _events[j].Date.Day)
                         {
-                            if(!show)
+                            if (!show)
                             {
                                 this.toolTip1.SetToolTip(this, _events[j].etc);
                                 show = true;
+                                Debug.WriteLine("들어옴" + j);
                             }
-                                
                         }
                         else
                         {
                             this.toolTip1.Hide(this);
-                            
+                            Debug.WriteLine("하이드" + j);
                         }
                     }
                 }
@@ -940,8 +1021,8 @@ namespace Calendar.NET
                         Color clr = Color.FromArgb(175, evnt.EventColor.R, evnt.EventColor.G, evnt.EventColor.B);
                         g.FillRectangle(new SolidBrush(GetFinalBackColor()), xStart, yStart + cellHourHeight / divisor + 1, ClientSize.Width - MarginSize * 2 - cellHourWidth - 3, cellHourHeight * ts.Hours - 1);
                         g.FillRectangle(new SolidBrush(clr), xStart, yStart + cellHourHeight / divisor + 1, ClientSize.Width - MarginSize * 2 - cellHourWidth - 3, cellHourHeight * ts.Hours - 1);
-                        g.DrawString(evnt.WorkType, evnt.EventFont, new SolidBrush(evnt.EventTextColor), xStart, yStart + cellHourHeight / divisor);
-                        g.DrawString(evnt.WorkTime, evnt.EventFont, new SolidBrush(evnt.EventTextColor), xStart, (yStart * 2) + cellHourHeight / divisor);
+                        g.DrawString(evnt.startTime, evnt.EventFont, new SolidBrush(evnt.EventTextColor), xStart, yStart + cellHourHeight / divisor);
+                        g.DrawString(evnt.endTime, evnt.EventFont, new SolidBrush(evnt.EventTextColor), xStart, (yStart * 2) + cellHourHeight / divisor);
                         g.DrawString(evnt.etc, evnt.EventFont, new SolidBrush(evnt.EventTextColor), xStart, (yStart * 3) + cellHourHeight / divisor);
                                                 
                         var ces = new cEvent
@@ -1191,22 +1272,26 @@ namespace Calendar.NET
                         int offsetY = renderOffsetY;
                         Region r = g.Clip;
                         Point point = _calendarDays[i];
-                        SizeF sz = g.MeasureString(v.etc, v.EventFont);
-                        int yy = point.Y - 1;
+                        SizeF sz = g.MeasureString(v.startTime, v.EventFont);
+                        int yy = point.Y + 5;
                         int xx = ((cellWidth - (int)sz.Width) / 2) + point.X;
 
                         if (sz.Width > cellWidth)
                             xx = point.X;
                         if (renderOffsetY + sz.Height > cellHeight - 10)
                             continue;
-                        g.Clip = new Region(new Rectangle(point.X + 1, point.Y + offsetY, cellWidth - 1, (int)sz.Height));
-                        g.FillRectangle(new SolidBrush(alphaColor), point.X + 1, point.Y + offsetY, cellWidth - 1, sz.Height);
+                        g.Clip = new Region(new Rectangle(point.X + 1, point.Y + offsetY, cellWidth - 1, (int)(sz.Height * 4)));
+                        //g.FillRectangle(new SolidBrush(alphaColor), point.X + 1, point.Y + offsetY, cellWidth - 1, sz.Height);
                         if (!v.Enabled && _showDashedBorderOnDisabledEvents)
                         {
                             var p = new Pen(new SolidBrush(Color.FromArgb(255, 0, 0, 0))) { DashStyle = DashStyle.Dash };
                             g.DrawRectangle(p, point.X + 1, point.Y + offsetY, cellWidth - 2, sz.Height - 1);
                         }
-                        g.DrawString(v.etc, v.EventFont, new SolidBrush(v.EventTextColor), xx, yy + offsetY);
+                        g.DrawString(v.startTime, v.EventFont, new SolidBrush(v.EventTextColor), xx, yy + offsetY);
+                        Debug.WriteLine(sz.Height);
+                        g.DrawString(v.endTime, v.EventFont, new SolidBrush(v.EventTextColor), xx, yy + (int)(sz.Height + 1));
+                        Debug.WriteLine(yy + sz.Height);
+                        g.DrawString(v.etc, v.EventFont, new SolidBrush(v.EventTextColor), xx, yy + (int)((sz.Height + 1) * 2));
                         
                         g.Clip = r;
 
@@ -1492,18 +1577,6 @@ namespace Calendar.NET
             set;
         }
 
-        public string WorkTime
-        {
-            get;
-            set;
-        }
-
-        public string WorkType
-        {
-            get;
-            set;
-        }
-
         public string etc
         {
             get;
@@ -1535,6 +1608,20 @@ namespace Calendar.NET
         }
 
         public bool ThisDayForwardOnly
+        {
+            get;
+            set;
+        }
+
+        public string startTime
+        {
+            get;
+
+
+            set;
+        }
+
+        public string endTime
         {
             get;
             set;
