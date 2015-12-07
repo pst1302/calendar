@@ -17,11 +17,10 @@ namespace Calendar.NET
     /// <param name="day">The day in question</param>
     /// <returns>Should return a boolean value that indicates if the event should be rendered on the day passed in</returns>
     public delegate bool CustomRecurringFrequenciesHandler(IEvent evnt, DateTime day);
-
+    public delegate void DateClicked(DateTime t);
 
     #endregion
-
-
+    
     #region Enum 부분
     /// <summary>
     /// An enumeration describing various ways to view the calendar
@@ -88,8 +87,7 @@ namespace Calendar.NET
 
 
     #endregion
-
-
+    
     #region Interface 부분
 
     /// <summary>
@@ -170,7 +168,7 @@ namespace Calendar.NET
 
     #endregion
 
-    #region Clendar class
+    #region 캘린더 클래스
     /// <summary>1
     /// A Winforms Calendar Control
     /// </summary>
@@ -215,8 +213,12 @@ namespace Calendar.NET
         private List<DateBox> dateBoxes;
         private ToolTip toolTip1;
         private int selectedDay = 0;
-        
+
+
+        public DateClicked dateClickEventHandler;
         #endregion
+
+        #region 구조체 정의
         /// <summary>
         /// 이벤트에 관한 구조체 해당 이벤트가 차지하고 있는 Area와 Event, 
         /// </summary>
@@ -264,6 +266,11 @@ namespace Calendar.NET
                 WorkInfo = new CustomEvent();
             }
         }
+
+        #endregion
+
+        #region 각종 설정 변수들
+
         /// <summary>
         /// Indicates the font for the times on the day view
         /// 
@@ -504,8 +511,10 @@ namespace Calendar.NET
             }
         }
 
+        #endregion
+
         /// <summary>
-        /// Calendar Constructor
+        /// 생성자
         /// </summary>
         public Calendar()
         {
@@ -528,8 +537,6 @@ namespace Calendar.NET
             _highlightCurrentDay = true;
             _calendarView = CalendarViews.Month;
             _scrollPanel = new ScrollPanel();
-
-            _scrollPanel.RightButtonClicked += ScrollPanelRightButtonClicked;
 
             _events = new List<IEvent>();
             _rectangles = new List<Rectangle>();
@@ -611,6 +618,7 @@ namespace Calendar.NET
             this.Load += new System.EventHandler(this.CalendarLoad);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.CalendarPaint);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.CalendarMouseClick);
+            this.MouseDoubleClick += Calendar_MouseDoubleClick;
             //this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.CalendarMouseMove);
             this.Resize += new System.EventHandler(this.CalendarResize);
             this._contextMenuStrip1.ResumeLayout(false);
@@ -621,14 +629,90 @@ namespace Calendar.NET
             //this.toolTip1.IsBalloon = true;
         }
 
-        private void Calendar_MouseHover(object sender, EventArgs e)
-        {
+        #region 이벤트 처리 함수들
 
+        bool show = false;
+
+
+        // Calender 위에서 마우스가 움직일때 발생하는 이벤트
+        private void CalendarMouseMove(object sender, MouseEventArgs e)
+        {
+            if (!_showEventTooltips)
+                return;
+
+            // 모든 데이타박스 검색
+            for (int i = 0; i < dateBoxes.Count; i++)
+            {
+                if (dateBoxes[i].size.Contains(new Point(e.X, e.Y)))
+                {
+                    for (int j = 0; j < _events.Count; j++)
+                    {
+                        if (dateBoxes[i].date == _events[j].Date.Day)
+                        {
+                            this.toolTip1.Show(_events[j].etc, this);
+                        }
+                        else
+                        {
+
+                        }
+                    }
+                }
+            }
         }
 
-        private void Calendar_Click(object sender, EventArgs e)
+        // 마우스 클릭에 대한 이벤트
+        private void CalendarMouseClick(object sender, MouseEventArgs e)
         {
 
+            // 마우스 왼쪽 버튼
+            if (e.Button == MouseButtons.Left && AllowEditingEvents)
+            {
+                // 한번 클릭하면 색이 변함 두번 클릭하면 특정 이벤트 실행
+                for (int i = 0; i < dateBoxes.Count; i++)
+                {
+                    if (dateBoxes[i].size.Contains(new Point(e.X, e.Y)))
+                    {
+
+                        if (selectedDay == dateBoxes[i].date)
+                        {
+                            // 새 폼을 생성하는 부분
+
+                            dateClickEventHandler(new DateTime(CalendarDate.Year, CalendarDate.Month, dateBoxes[i].date));
+                        }
+
+                        selectedDay = dateBoxes[i].date;
+
+                        Refresh();
+
+                    }
+                }
+            }
+
+            // 마우스 오른쪽 버튼 이벤트 -> 나중에 추가
+            if (e.Button == MouseButtons.Right && AllowEditingEvents)
+            {
+                // 마우스 오른쪽 클릭에 대한 로직 
+            }
+        }
+
+        // 더블클릭
+        private void Calendar_MouseDoubleClick(object sender, MouseEventArgs e)
+        {
+            for (int i = 0; i < dateBoxes.Count; i++)
+            {
+                if (dateBoxes[i].size.Contains(new Point(e.X, e.Y)))
+                {
+                    if (selectedDay == dateBoxes[i].date)
+                    {
+                        // 새 폼을 생성하는 부분
+                        dateClickEventHandler(new DateTime(CalendarDate.Year, CalendarDate.Month, dateBoxes[i].date));
+                    }
+
+                    selectedDay = dateBoxes[i].date;
+
+                    Refresh();
+                }
+            }
         }
 
         // > 모양의 버튼을 눌렀을때의 클릭 이벤트
@@ -661,6 +745,10 @@ namespace Calendar.NET
             Refresh();
         }
 
+
+        #endregion
+
+        #region public 함수들
         /// <summary>
         /// Adds an event to the calendar
         /// </summary>
@@ -792,6 +880,10 @@ namespace Calendar.NET
             Refresh();
         }
 
+        #endregion
+
+        #region 코어함수
+
         private void CalendarLoad(object sender, EventArgs e)
         {
             if (Parent != null)
@@ -810,123 +902,6 @@ namespace Calendar.NET
                 RenderDayCalendar(e);
         }
 
-        bool show = false;
-
-        // Calender 위에서 마우스가 움직일때 발생하는 이벤트
-        private void CalendarMouseMove(object sender, MouseEventArgs e)
-        {
-            if (!_showEventTooltips)
-                return;
-
-            // 모든 데이타박스 검색
-            for (int i = 0; i < dateBoxes.Count; i++)
-            {
-                if (dateBoxes[i].size.Contains(new Point(e.X, e.Y)))
-                {
-                    for (int j = 0; j < _events.Count; j++)
-                    {
-                        if (dateBoxes[i].date == _events[j].Date.Day)
-                        {
-                            this.toolTip1.Show(_events[j].etc, this);
-                            Debug.WriteLine("show");
-                        }
-                        else
-                        {
-                            
-                        }
-                    }
-                }
-            }
-        }
-
-        // 마우스 오른쪽 클릭에 대한 이벤트
-        private void ScrollPanelRightButtonClicked(object sender, MouseEventArgs e)
-        {
-            if (AllowEditingEvents && _calendarView == CalendarViews.Day)
-            {
-                int nums = _cEvents.Count;
-                
-                for (int i = 0; i < nums; i++)
-                {
-                    var zs = _cEvents[i];
-
-                    if (zs.EventArea.Contains(e.X, e.Y + _scrollPanel.ScrollOffset) && !zs.Event.ReadOnlyEvent)
-                    {
-                        _cEvent = zs;
-                        _contextMenuStrip1.Show(_scrollPanel, new Point(e.X, e.Y));
-                        break;
-                    }
-                }
-            }
-        }
-
-        // 마우스 클릭에 대한 이벤트
-        private void CalendarMouseClick(object sender, MouseEventArgs e)
-        {
-            
-            // 한번 클릭하면 색이 변함 두번 클릭하면 특정 이벤트 실행
-            for(int i = 0;i < dateBoxes.Count; i++)
-            {
-                if(dateBoxes[i].size.Contains(new Point(e.X, e.Y)))
-                {
-                    
-                    if(selectedDay == dateBoxes[i].date)
-                    {
-                        // 새 폼을 생성하는 부분
-                        MessageBox.Show(dateBoxes[i].month.ToString() + "월 " + dateBoxes[i].date.ToString() + "일");
-                    }
-
-                    selectedDay = dateBoxes[i].date;
-                    Refresh();
-                    
-                }
-            }
-
-            if (e.Button == MouseButtons.Right && AllowEditingEvents)
-            {
-                if (_calendarView == CalendarViews.Month)
-                {
-                    int nums = _cEvents.Count;
-                    for (int i = 0; i < nums; i++)
-                    {
-                        var zs = _cEvents[i];
-
-                        if (zs.EventArea.Contains(e.X, e.Y) && !zs.Event.ReadOnlyEvent)
-                        {
-                            _cEvent = zs;
-                            _contextMenuStrip1.Show(this, e.Location);
-                            break;
-                        }
-                    }
-                }
-            }
-        }
-
-        private void BtnTodayButtonClicked(object sender)
-        {
-            _calendarDate = DateTime.Now;
-            Refresh();
-        }
-
-        private void BtnLeftButtonClicked(object sender)
-        {
-            selectedDay = 0;
-            if (_calendarView == CalendarViews.Month)
-                _calendarDate = _calendarDate.AddMonths(-1);
-            else if (_calendarView == CalendarViews.Day)
-                _calendarDate = _calendarDate.AddDays(-1);
-            Refresh();
-        }
-
-        private void BtnRightButtonClicked(object sender)
-        {
-            selectedDay = 0;
-            if (_calendarView == CalendarViews.Day)
-                _calendarDate = _calendarDate.AddDays(1);
-            else if (_calendarView == CalendarViews.Month)
-                _calendarDate = _calendarDate.AddMonths(1);
-            Refresh();
-        }
 
         private void ParentResize(object sender, EventArgs e)
         {
@@ -1254,20 +1229,44 @@ namespace Calendar.NET
                 Font ImageInfoFont = new Font("Arial", 8, FontStyle.Regular);
 
                 g.DrawRectangle(Pens.Black, new Rectangle(ClientSize.Width - 105, MarginSize - 16, 80, 46));
-                Bitmap start = new Bitmap(Application.StartupPath + @"\image\start.png");
-                Rectangle startSize = new Rectangle(ClientSize.Width - 100, MarginSize - 12, 10 ,12);
-                g.DrawImage(start, startSize);
+
+                
+                try {
+                    Bitmap start = new Bitmap(Application.StartupPath + @"\image\start.png");
+                    Rectangle startSize = new Rectangle(ClientSize.Width - 100, MarginSize - 12, 10, 12);
+                    g.DrawImage(start, startSize);
+                }
+                catch (Exception ex)
+                {
+
+                }
+                
                 g.DrawString("근무 시작", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize - 12);
 
-                Bitmap end = new Bitmap(Application.StartupPath + @"\image\end.png");
-                Rectangle endSize = new Rectangle(ClientSize.Width - 100, MarginSize + 2, 10, 12);
-                g.DrawImage(end, endSize);
-                g.DrawString("근무 종료", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize + 2);
+                
+                try { 
+                    Bitmap end = new Bitmap(Application.StartupPath + @"\image\end.png");
+                    Rectangle endSize = new Rectangle(ClientSize.Width - 100, MarginSize + 2, 10, 12);
+                    g.DrawImage(end, endSize);
+                }
+                catch (Exception ex)
+                {
 
-                Bitmap etc = new Bitmap(Application.StartupPath + @"\image\etc.png");
-                Rectangle etcSize = new Rectangle(ClientSize.Width - 100, MarginSize + 16, 10, 12);
-                g.DrawImage(etc, etcSize);
+                }
+                g.DrawString("근무 종료", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize + 2);
+                
+                try {
+                    Bitmap etc = new Bitmap(Application.StartupPath + @"\image\etc.png");
+                    Rectangle etcSize = new Rectangle(ClientSize.Width - 100, MarginSize + 16, 10, 12);
+                    g.DrawImage(etc, etcSize);
+                }
+                catch(Exception ex)
+                {
+
+                }
+
                 g.DrawString("비고", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize + 16);
+            
             }
 
             // 해당 년과 달의 이벤트를 찾아서 그리는 부분
@@ -1416,6 +1415,9 @@ namespace Calendar.NET
 
     #endregion
 
+    #endregion
+
+    #region 캘린더 내부의 ScrollPanel (수정 금지)
     public class ScrollPanel : UserControl
     {
 
@@ -1436,8 +1438,7 @@ namespace Calendar.NET
             }
             base.Dispose(disposing);
         }
-
-        #region Component Designer generated code
+        
 
         /// <summary> 
         /// Required method for Designer support - do not modify 
@@ -1551,6 +1552,9 @@ namespace Calendar.NET
         }
     }
 
+    #endregion
+
+    #region CustomEvent 구조체 (수정 금지)
     public class CustomEvent : IEvent
     {
         public int Rank

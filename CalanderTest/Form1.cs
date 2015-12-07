@@ -17,24 +17,25 @@ namespace CalanderTest
             InitializeComponent();
             calendar1.CalendarDate = DateTime.Now;
 
-            
+            // 해당 날짜를 두번클릭할때 발생하는 이벤트 할당 예제
+            calendar1.dateClickEventHandler += Date_Click;
         }
-
-        public object StopWatch { get; private set; }
 
         private void button1_Click(object sender, EventArgs e)
         {
 
-            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-            sw.Start();
             for(int i = 1; i < 30; i++)
 
-                calendar1.AddWork("10시 48분", "19시 00분", "출장", new DateTime(2015, 12, i));
+                calendar1.AddWork("11시 00분", "18시 00분", "출장", new DateTime(2015, 12, i));
 
             calendar1.Refresh();
-            sw.Stop();
+            
+        }
 
-            System.Diagnostics.Debug.WriteLine(sw.Elapsed.ToString());
+        // 내가 작성한 이벤트 처리 함수
+        private void Date_Click(DateTime time)
+        {
+            calendar1.AddWork("11시 00분", "18시 00분", "없음", time);
         }
 
         private void button2_Click(object sender, EventArgs e)
