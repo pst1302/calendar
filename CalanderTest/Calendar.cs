@@ -691,7 +691,7 @@ namespace Calendar.NET
             // 마우스 오른쪽 버튼 이벤트 -> 나중에 추가
             if (e.Button == MouseButtons.Right && AllowEditingEvents)
             {
-                // 마우스 오른쪽 클릭에 대한 로직 
+                // 구현 부분
             }
         }
 
@@ -723,6 +723,8 @@ namespace Calendar.NET
                 _calendarDate = _calendarDate.AddDays(1);
             else if (_calendarView == CalendarViews.Month)
                 _calendarDate = _calendarDate.AddMonths(1);
+
+            
             Refresh();
         }
 
@@ -806,17 +808,29 @@ namespace Calendar.NET
         /// <param name="Date"></param>
         public void AddWorkStartTime(String startTime, DateTime Date)
         {
+            bool isexst = false;
+
             for(int i = 0;i < _events.Count; i++)
             {
                 if(_events[i].Date.Year == _calendarDate.Year && _events[i].Date.Month == _calendarDate.Month
                     && _events[i].Date.Day == Date.Day)
                 {
                     _events[i].startTime = startTime;
-                    Refresh();
-                    return;
+                    isexst = true;
+                    break;
                 }
             }
-            AddWork(startTime, "", "", Date);
+
+            if (isexst)
+            {
+
+            }
+            else
+            {
+                AddWork(startTime, "", "", Date);
+            }
+
+            
             Refresh();
             
         }
@@ -845,6 +859,7 @@ namespace Calendar.NET
                     return;
                 }
             }
+
             if(existEvent)
                 AddWork("", endTime, "", Date);
         }
@@ -864,7 +879,7 @@ namespace Calendar.NET
                     
                     _events[i].etc = etc;
                     Refresh();
-
+                    
                     return;
                 }
             }
@@ -907,6 +922,7 @@ namespace Calendar.NET
         {
             ResizeScrollPanel();
             Refresh();
+            Invalidate();
         }
         
         private DateTime LastDayOfWeekInMonth(DateTime day, DayOfWeek dow)
@@ -1062,6 +1078,8 @@ namespace Calendar.NET
             _calendarDays.Clear();
             _cEvents.Clear();
             dateBoxes.Clear();
+
+            // e.Graphics.draw
 
             var bmp = new Bitmap(ClientSize.Width, ClientSize.Height);
             Graphics g = Graphics.FromImage(bmp);
@@ -1338,6 +1356,8 @@ namespace Calendar.NET
             _rectangles.Clear();
 
             g.Dispose();
+
+            
             e.Graphics.DrawImage(bmp, 0, 0, ClientSize.Width, ClientSize.Height);
             bmp.Dispose();
         }
