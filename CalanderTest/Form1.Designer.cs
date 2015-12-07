@@ -32,8 +32,10 @@
             this.button1 = new System.Windows.Forms.Button();
             this.button2 = new System.Windows.Forms.Button();
             this.button3 = new System.Windows.Forms.Button();
-            this.calendar1 = new Calendar.NET.Calendar();
             this.button4 = new System.Windows.Forms.Button();
+            this.button5 = new System.Windows.Forms.Button();
+            this.button6 = new System.Windows.Forms.Button();
+            this.calendar1 = new Calendar.NET.Calendar();
             this.panel1.SuspendLayout();
             this.SuspendLayout();
             // 
@@ -41,13 +43,15 @@
             // 
             this.panel1.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
             | System.Windows.Forms.AnchorStyles.Right)));
+            this.panel1.Controls.Add(this.button6);
+            this.panel1.Controls.Add(this.button5);
             this.panel1.Controls.Add(this.button4);
             this.panel1.Controls.Add(this.button3);
             this.panel1.Controls.Add(this.button2);
             this.panel1.Controls.Add(this.button1);
-            this.panel1.Location = new System.Drawing.Point(673, 12);
+            this.panel1.Location = new System.Drawing.Point(813, 12);
             this.panel1.Name = "panel1";
-            this.panel1.Size = new System.Drawing.Size(189, 476);
+            this.panel1.Size = new System.Drawing.Size(189, 598);
             this.panel1.TabIndex = 1;
             // 
             // button1
@@ -80,6 +84,36 @@
             this.button3.UseVisualStyleBackColor = true;
             this.button3.Click += new System.EventHandler(this.button3_Click);
             // 
+            // button4
+            // 
+            this.button4.Location = new System.Drawing.Point(19, 153);
+            this.button4.Name = "button4";
+            this.button4.Size = new System.Drawing.Size(153, 58);
+            this.button4.TabIndex = 3;
+            this.button4.Text = "12월 04일\r\n근무 마치는 시간 입력\r\n근무 시작시간이 없을 경우 입력되지 않음";
+            this.button4.UseVisualStyleBackColor = true;
+            this.button4.Click += new System.EventHandler(this.button4_Click);
+            // 
+            // button5
+            // 
+            this.button5.Location = new System.Drawing.Point(19, 218);
+            this.button5.Name = "button5";
+            this.button5.Size = new System.Drawing.Size(153, 55);
+            this.button5.TabIndex = 4;
+            this.button5.Text = "12월 07일\r\n근무 마치는 시간 입력\r\n";
+            this.button5.UseVisualStyleBackColor = true;
+            this.button5.Click += new System.EventHandler(this.button5_Click);
+            // 
+            // button6
+            // 
+            this.button6.Location = new System.Drawing.Point(19, 280);
+            this.button6.Name = "button6";
+            this.button6.Size = new System.Drawing.Size(153, 56);
+            this.button6.TabIndex = 5;
+            this.button6.Text = "12월 07일\r\n비고란 입력";
+            this.button6.UseVisualStyleBackColor = true;
+            this.button6.Click += new System.EventHandler(this.button6_Click);
+            // 
             // calendar1
             // 
             this.calendar1.AllowEditingEvents = true;
@@ -104,26 +138,16 @@
             this.calendar1.ShowDisabledEvents = false;
             this.calendar1.ShowEventTooltips = true;
             this.calendar1.ShowTodayButton = true;
-            this.calendar1.Size = new System.Drawing.Size(667, 500);
+            this.calendar1.Size = new System.Drawing.Size(807, 622);
             this.calendar1.TabIndex = 0;
             this.calendar1.TodayFont = new System.Drawing.Font("Arial", 10F, System.Drawing.FontStyle.Bold);
-            // 
-            // button4
-            // 
-            this.button4.Location = new System.Drawing.Point(19, 153);
-            this.button4.Name = "button4";
-            this.button4.Size = new System.Drawing.Size(153, 58);
-            this.button4.TabIndex = 3;
-            this.button4.Text = "12월 4일\r\n근무 마치는 시간 입력\r\n근무 시작시간이 없을 경우 입력되지 않음";
-            this.button4.UseVisualStyleBackColor = true;
-            this.button4.Click += new System.EventHandler(this.button4_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.BackColor = System.Drawing.SystemColors.Control;
-            this.ClientSize = new System.Drawing.Size(874, 500);
+            this.ClientSize = new System.Drawing.Size(1014, 622);
             this.Controls.Add(this.panel1);
             this.Controls.Add(this.calendar1);
             this.Name = "Form1";
@@ -141,6 +165,8 @@
         private System.Windows.Forms.Button button2;
         private System.Windows.Forms.Button button3;
         private System.Windows.Forms.Button button4;
+        private System.Windows.Forms.Button button5;
+        private System.Windows.Forms.Button button6;
     }
 }
 

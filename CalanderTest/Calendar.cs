@@ -215,7 +215,7 @@ namespace Calendar.NET
         private List<DateBox> dateBoxes;
         private ToolTip toolTip1;
         private int selectedDay = 0;
-
+        
         #endregion
         /// <summary>
         /// 이벤트에 관한 구조체 해당 이벤트가 차지하고 있는 Area와 Event, 
@@ -611,12 +611,14 @@ namespace Calendar.NET
             this.Load += new System.EventHandler(this.CalendarLoad);
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.CalendarPaint);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.CalendarMouseClick);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.CalendarMouseMove);
+            //this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.CalendarMouseMove);
             this.Resize += new System.EventHandler(this.CalendarResize);
             this._contextMenuStrip1.ResumeLayout(false);
             this.ResumeLayout(false);
 
             this.toolTip1.InitialDelay = 1000;
+            this.toolTip1.AutomaticDelay = 1000;
+            //this.toolTip1.IsBalloon = true;
         }
 
         private void Calendar_MouseHover(object sender, EventArgs e)
@@ -702,11 +704,11 @@ namespace Calendar.NET
                 }
                 
             }
-
+            
             if (!existEvent)            // 해당 날짜에 이벤트가 존재하면 추가하지 않는다.
                 _events.Add(ce);
 
-            Refresh();
+            
         }
 
         /// <summary>
@@ -727,6 +729,8 @@ namespace Calendar.NET
                 }
             }
             AddWork(startTime, "", "", Date);
+            Refresh();
+            
         }
 
        /// <summary>
@@ -813,7 +817,6 @@ namespace Calendar.NET
         {
             if (!_showEventTooltips)
                 return;
-            //
 
             // 모든 데이타박스 검색
             for (int i = 0; i < dateBoxes.Count; i++)
@@ -824,17 +827,12 @@ namespace Calendar.NET
                     {
                         if (dateBoxes[i].date == _events[j].Date.Day)
                         {
-                            if (!show)
-                            {
-                                this.toolTip1.SetToolTip(this, _events[j].etc);
-                                show = true;
-                                Debug.WriteLine("들어옴" + j);
-                            }
+                            this.toolTip1.Show(_events[j].etc, this);
+                            Debug.WriteLine("show");
                         }
                         else
                         {
-                            this.toolTip1.Hide(this);
-                            Debug.WriteLine("하이드" + j);
+                            
                         }
                     }
                 }
@@ -1206,7 +1204,7 @@ namespace Calendar.NET
                             if (counter2 == 1)
                             {
                                 g.DrawString(_calendarDate.AddMonths(1).ToString("MMM") + " " + counter2.ToString(CultureInfo.InvariantCulture), _daysFont,
-                                             new SolidBrush(Color.FromArgb(170, 170, 170)), xStart + 5, yStart + 2);
+                                            new SolidBrush(Color.FromArgb(170, 170, 170)), xStart + 5, yStart + 2);
                             }
                             else
                             {
@@ -1248,9 +1246,28 @@ namespace Calendar.NET
             if (_showDateInHeader)
             {
                 g.DrawString(
-                    _calendarDate.ToString("MMMM") + " " + _calendarDate.Year.ToString(CultureInfo.InvariantCulture),
-                    _dateHeaderFont, Brushes.Black, ClientSize.Width - MarginSize - dateHeaderSize.Width,
+                    _calendarDate.Year.ToString(CultureInfo.InvariantCulture) + "년 " + _calendarDate.ToString("MMMM"),
+                    _dateHeaderFont, Brushes.Black, ClientSize.Width / 2,
                     MarginSize);
+
+                // 범례 부분
+                Font ImageInfoFont = new Font("Arial", 8, FontStyle.Regular);
+
+                g.DrawRectangle(Pens.Black, new Rectangle(ClientSize.Width - 105, MarginSize - 16, 80, 46));
+                Bitmap start = new Bitmap(Application.StartupPath + @"\image\start.png");
+                Rectangle startSize = new Rectangle(ClientSize.Width - 100, MarginSize - 12, 10 ,12);
+                g.DrawImage(start, startSize);
+                g.DrawString("근무 시작", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize - 12);
+
+                Bitmap end = new Bitmap(Application.StartupPath + @"\image\end.png");
+                Rectangle endSize = new Rectangle(ClientSize.Width - 100, MarginSize + 2, 10, 12);
+                g.DrawImage(end, endSize);
+                g.DrawString("근무 종료", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize + 2);
+
+                Bitmap etc = new Bitmap(Application.StartupPath + @"\image\etc.png");
+                Rectangle etcSize = new Rectangle(ClientSize.Width - 100, MarginSize + 16, 10, 12);
+                g.DrawImage(etc, etcSize);
+                g.DrawString("비고", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize + 16);
             }
 
             // 해당 년과 달의 이벤트를 찾아서 그리는 부분
@@ -1273,7 +1290,7 @@ namespace Calendar.NET
                         Region r = g.Clip;
                         Point point = _calendarDays[i];
                         SizeF sz = g.MeasureString(v.startTime, v.EventFont);
-                        int yy = point.Y + 5;
+                        int yy = point.Y - 1;
                         int xx = ((cellWidth - (int)sz.Width) / 2) + point.X;
 
                         if (sz.Width > cellWidth)
@@ -1287,11 +1304,23 @@ namespace Calendar.NET
                             var p = new Pen(new SolidBrush(Color.FromArgb(255, 0, 0, 0))) { DashStyle = DashStyle.Dash };
                             g.DrawRectangle(p, point.X + 1, point.Y + offsetY, cellWidth - 2, sz.Height - 1);
                         }
-                        g.DrawString(v.startTime, v.EventFont, new SolidBrush(v.EventTextColor), xx, yy + offsetY);
-                        Debug.WriteLine(sz.Height);
-                        g.DrawString(v.endTime, v.EventFont, new SolidBrush(v.EventTextColor), xx, yy + (int)(sz.Height + 1));
-                        Debug.WriteLine(yy + sz.Height);
-                        g.DrawString(v.etc, v.EventFont, new SolidBrush(v.EventTextColor), xx, yy + (int)((sz.Height + 1) * 2));
+                        // 근무 시작 이미지와 글씨 입력
+                        Bitmap start = new Bitmap(Application.StartupPath + @"\image\start.png");
+                        Rectangle startSize = new Rectangle(xx, yy + offsetY, 10, (int)(sz.Height + 1));
+                        g.DrawImage(start, startSize);
+                        g.DrawString(v.startTime, v.EventFont, new SolidBrush(v.EventTextColor), xx + 10, yy + offsetY);
+
+                        // 근무 마침 이미지와 글씨 입력
+                        Bitmap end = new Bitmap(Application.StartupPath + @"\image\end.png");
+                        Rectangle endSize = new Rectangle(xx, yy + (int)(sz.Height + 1), 10, (int)(sz.Height + 1));
+                        g.DrawImage(end, endSize);
+                        g.DrawString(v.endTime, v.EventFont, new SolidBrush(v.EventTextColor), xx + 10, yy + (int)(sz.Height + 1));
+
+                        // 비고란 이미지와 글씨 입력
+                        Bitmap etc = new Bitmap(Application.StartupPath + @"\image\etc.png");
+                        Rectangle etcSize = new Rectangle(xx, yy + (int)((sz.Height + 1) * 2), 10, (int)(sz.Height + 1));
+                        g.DrawImage(etc, etcSize);
+                        g.DrawString(v.etc, v.EventFont, new SolidBrush(v.EventTextColor), xx + 10, yy + (int)((sz.Height + 1) * 2));
                         
                         g.Clip = r;
 
@@ -1356,6 +1385,7 @@ namespace Calendar.NET
                 return false;
             }
 
+            
             if (evnt.RecurringFrequency == RecurringFrequencies.None && evnt.Date.Year == day.Year &&
                 evnt.Date.Month == day.Month && evnt.Date.Day == day.Day)
                 return DayForward(evnt, day);

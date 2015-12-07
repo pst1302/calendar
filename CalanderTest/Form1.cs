@@ -20,13 +20,21 @@ namespace CalanderTest
             
         }
 
+        public object StopWatch { get; private set; }
+
         private void button1_Click(object sender, EventArgs e)
         {
-            calendar1.AddWork("11시 10분", "18시 15분", "", new DateTime(2015, 12, 1));
-            calendar1.AddWork("10시 56분","17시 55분","", DateTime.Now);
-            calendar1.AddWork("10시 40분","18시 05분","", new DateTime(2015,12,3));
-            calendar1.AddWork("10시 48분", "19시 00분", "출장", new DateTime(2015, 12, 4));
-            
+
+            System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
+            sw.Start();
+            for(int i = 1; i < 30; i++)
+
+                calendar1.AddWork("10시 48분", "19시 00분", "출장", new DateTime(2015, 12, i));
+
+            calendar1.Refresh();
+            sw.Stop();
+
+            System.Diagnostics.Debug.WriteLine(sw.Elapsed.ToString());
         }
 
         private void button2_Click(object sender, EventArgs e)
@@ -42,6 +50,16 @@ namespace CalanderTest
         private void button4_Click(object sender, EventArgs e)
         {
             calendar1.AddWorkEndTime("18시 00분", new DateTime(2015, 12, 4));
+        }
+
+        private void button5_Click(object sender, EventArgs e)
+        {
+            calendar1.AddWorkEndTime("15시 00분", new DateTime(2015, 12, 7));
+        }
+
+        private void button6_Click(object sender, EventArgs e)
+        {
+            calendar1.AddEtc("병가로 조퇴", new DateTime(2015, 12, 7));
         }
     }
 }
