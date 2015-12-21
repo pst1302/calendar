@@ -6,6 +6,12 @@ using System.Windows.Forms;
 
 namespace CalanderTest
 {
+
+    enum mod
+    {
+        Test,       // 테스트를 위한 폼
+        Excute      // 실제 실행을 위한 폼
+    }
     static class Program
     {
         /// <summary>
@@ -16,7 +22,17 @@ namespace CalanderTest
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Form1());
+
+            mod mode = mod.Test;
+            
+            if(mode == mod.Test)
+            {
+                Application.Run(new TestForm());
+            }
+            else if(mode == mod.Excute)
+            {
+                Application.Run(new Form1());
+            }
         }
     }
 }

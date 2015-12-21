@@ -282,8 +282,8 @@ namespace Calendar.NET
             {
                 _dayViewTimeFont = value;
                 if (_calendarView == CalendarViews.Day)
-                    _scrollPanel.Refresh();
-                else Refresh();
+                    _scrollPanel.Invalidate();
+                else Invalidate();
             }
         }
 
@@ -298,7 +298,7 @@ namespace Calendar.NET
             {
                 _calendarView = value;
                 _scrollPanel.Visible = value == CalendarViews.Day;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -311,7 +311,7 @@ namespace Calendar.NET
             set
             {
                 _highlightCurrentDay = value;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -334,7 +334,7 @@ namespace Calendar.NET
             set
             {
                 _dimDisabledEvents = value;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -348,7 +348,7 @@ namespace Calendar.NET
             set
             {
                 _showDashedBorderOnDisabledEvents = value;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -361,7 +361,7 @@ namespace Calendar.NET
             set
             {
                 _showDisabledEvents = value;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -378,12 +378,12 @@ namespace Calendar.NET
                 {
                     _events.Clear();
                     //PresetHolidays();
-                    Refresh();
+                    Invalidate();
                 }
                 else
                 {
                     _events.Clear();
-                    Refresh();
+                    Invalidate();
                 }
             }
         }
@@ -406,7 +406,7 @@ namespace Calendar.NET
             set
             {
                 _dateHeaderFont = value;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -422,7 +422,7 @@ namespace Calendar.NET
                 if (_calendarView == CalendarViews.Day)
                     ResizeScrollPanel();
 
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -439,7 +439,7 @@ namespace Calendar.NET
                 _rightBtn.Visible = value;
                 if (_calendarView == CalendarViews.Day)
                     ResizeScrollPanel();
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -455,7 +455,7 @@ namespace Calendar.NET
                 _todayBtn.Visible = value;
                 if (_calendarView == CalendarViews.Day)
                     ResizeScrollPanel();
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -468,7 +468,7 @@ namespace Calendar.NET
             set
             {
                 _todayFont = value;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -481,7 +481,7 @@ namespace Calendar.NET
             set
             {
                 _daysFont = value;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -494,7 +494,7 @@ namespace Calendar.NET
             set
             {
                 _dayOfWeekFont = value;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -507,7 +507,7 @@ namespace Calendar.NET
             set
             {
                 _calendarDate = value;
-                Refresh();
+                Invalidate();
             }
         }
 
@@ -682,7 +682,7 @@ namespace Calendar.NET
 
                         selectedDay = dateBoxes[i].date;
 
-                        Refresh();
+                        //Invalidate();
 
                     }
                 }
@@ -710,7 +710,7 @@ namespace Calendar.NET
 
                     selectedDay = dateBoxes[i].date;
 
-                    Refresh();
+                    
                 }
             }
         }
@@ -724,8 +724,8 @@ namespace Calendar.NET
             else if (_calendarView == CalendarViews.Month)
                 _calendarDate = _calendarDate.AddMonths(1);
 
-            
-            Refresh();
+
+            Invalidate();
         }
 
 
@@ -737,14 +737,14 @@ namespace Calendar.NET
                 _calendarDate = _calendarDate.AddMonths(-1);
             else if (_calendarView == CalendarViews.Day)
                 _calendarDate = _calendarDate.AddDays(-1);
-            Refresh();
+            Invalidate();
         }
 
         // today 버튼을 눌렀을때의 이벤트 처리
         private void _todayBtn_Click(object sender, EventArgs e)
         {
             _calendarDate = DateTime.Now;
-            Refresh();
+            Invalidate();
         }
 
 
@@ -758,7 +758,7 @@ namespace Calendar.NET
         public void AddEvent(IEvent calendarEvent)
         {
             _events.Add(calendarEvent);
-            Refresh();
+            Invalidate();
         }
 
         /// <summary>
@@ -830,8 +830,8 @@ namespace Calendar.NET
                 AddWork(startTime, "", "", Date);
             }
 
-            
-            Refresh();
+
+            Invalidate();
             
         }
 
@@ -854,7 +854,7 @@ namespace Calendar.NET
                         return;
 
                     _events[i].endTime = endTime;
-                    Refresh();
+                    Invalidate();
 
                     return;
                 }
@@ -878,7 +878,7 @@ namespace Calendar.NET
                 {
                     
                     _events[i].etc = etc;
-                    Refresh();
+                    Invalidate();
                     
                     return;
                 }
@@ -892,7 +892,7 @@ namespace Calendar.NET
         public void RemoveEvent(IEvent calendarEvent)
         {
             _events.Remove(calendarEvent);
-            Refresh();
+            Invalidate();
         }
 
         #endregion
@@ -921,7 +921,7 @@ namespace Calendar.NET
         private void ParentResize(object sender, EventArgs e)
         {
             ResizeScrollPanel();
-            Refresh();
+            
             Invalidate();
         }
         
@@ -1249,39 +1249,24 @@ namespace Calendar.NET
                 g.DrawRectangle(Pens.Black, new Rectangle(ClientSize.Width - 105, MarginSize - 16, 80, 46));
 
                 
-                try {
-                    Bitmap start = new Bitmap(Application.StartupPath + @"\image\start.png");
-                    Rectangle startSize = new Rectangle(ClientSize.Width - 100, MarginSize - 12, 10, 12);
-                    g.DrawImage(start, startSize);
-                }
-                catch (Exception ex)
-                {
-
-                }
+                
+                Bitmap start = new Bitmap(Application.StartupPath + @"\image\start.png");
+                Rectangle startSize = new Rectangle(ClientSize.Width - 100, MarginSize - 12, 10, 12);
+                g.DrawImage(start, startSize);
                 
                 g.DrawString("근무 시작", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize - 12);
 
                 
-                try { 
-                    Bitmap end = new Bitmap(Application.StartupPath + @"\image\end.png");
-                    Rectangle endSize = new Rectangle(ClientSize.Width - 100, MarginSize + 2, 10, 12);
-                    g.DrawImage(end, endSize);
-                }
-                catch (Exception ex)
-                {
-
-                }
+                 
+                Bitmap end = new Bitmap(Application.StartupPath + @"\image\end.png");
+                Rectangle endSize = new Rectangle(ClientSize.Width - 100, MarginSize + 2, 10, 12);
+                g.DrawImage(end, endSize);
+                
                 g.DrawString("근무 종료", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize + 2);
                 
-                try {
-                    Bitmap etc = new Bitmap(Application.StartupPath + @"\image\etc.png");
-                    Rectangle etcSize = new Rectangle(ClientSize.Width - 100, MarginSize + 16, 10, 12);
-                    g.DrawImage(etc, etcSize);
-                }
-                catch(Exception ex)
-                {
-
-                }
+                Bitmap etc = new Bitmap(Application.StartupPath + @"\image\etc.png");
+                Rectangle etcSize = new Rectangle(ClientSize.Width - 100, MarginSize + 16, 10, 12);
+                g.DrawImage(etc, etcSize);
 
                 g.DrawString("비고", ImageInfoFont, Brushes.Black, ClientSize.Width - 100 + 12, MarginSize + 16);
             
@@ -1479,7 +1464,7 @@ namespace Calendar.NET
             this.Paint += new System.Windows.Forms.PaintEventHandler(this.ScrollPanel_Paint);
             this.MouseClick += new System.Windows.Forms.MouseEventHandler(this.ScrollPanel_MouseClick);
             this.MouseDown += new System.Windows.Forms.MouseEventHandler(this.ScrollPanel_MouseDown);
-            this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ScrollPanel_MouseMove);
+            //this.MouseMove += new System.Windows.Forms.MouseEventHandler(this.ScrollPanel_MouseMove);
             this.MouseUp += new System.Windows.Forms.MouseEventHandler(this.ScrollPanel_MouseUp);
             this.ResumeLayout(false);
 
@@ -1551,13 +1536,13 @@ namespace Calendar.NET
             {
                 int offset = _oldMouseCoords.Y - e.Location.Y;
                 _scrollOffset += offset;
-                Refresh();
+                Invalidate();
             }
             if (_mouseDown && e.Location.Y > _oldMouseCoords.Y && _scrollOffset > 0)
             {
                 int offset = e.Location.Y - _oldMouseCoords.Y;
                 _scrollOffset -= offset;
-                Refresh();
+                Invalidate();
             }
             _oldMouseCoords = e.Location;
         }
