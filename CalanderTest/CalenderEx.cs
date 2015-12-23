@@ -293,11 +293,15 @@ namespace CalanderTest
         Font stringFont;
         Pen pen;
 
+        ToolTip tooltip;
+
         public DateClick DateClickEventHandler;
 
         public DatePanel(DateTime time) : base()
         {
             //System.Diagnostics.Debug.WriteLine(dt.Day +"일 생성자 호출됨");
+
+            tooltip = new ToolTip();
 
             isSelect = false;
             haveData = false;
@@ -318,6 +322,15 @@ namespace CalanderTest
             this.SetStyle(ControlStyles.UserPaint, true);
 
             this.Click += DatePanel_Click;
+            this.MouseHover += DatePanel_MouseHover;
+        }
+
+        private void DatePanel_MouseHover(object sender, EventArgs e)
+        {
+            if (note != null)
+            {
+                tooltip.SetToolTip(this, note);
+            }
         }
 
         private void DatePanel_Click(object sender, EventArgs e)

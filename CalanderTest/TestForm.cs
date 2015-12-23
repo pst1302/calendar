@@ -37,12 +37,12 @@ namespace CalanderTest
 
         private void AddMonthEvent()
         {
-            MessageBox.Show("다음달!");
+            MessageBox.Show("다음달로 이동할때 작업 추가 예시");
         }
 
         private void reduceMonthEvent()
         {
-            MessageBox.Show("이전달!");
+            MessageBox.Show("이전달로 이동할때 작업 추가 예시");
         }
 
         private void dtClickEvent(DateTime dt)
@@ -75,7 +75,7 @@ namespace CalanderTest
             {
                 ((DatePanel)calenderEx1.Controls[i]).AddWork(WorkType.Working,
                 6,
-                "출장");
+                "없음");
             }
         }
     }
