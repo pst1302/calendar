@@ -66,6 +66,12 @@
     <Compile Include="TestForm.Designer.cs">
       <DependentUpon>TestForm.cs</DependentUpon>
     </Compile>
+    <Compile Include="WorkEnterForm.cs">
+      <SubType>Form</SubType>
+    </Compile>
+    <Compile Include="WorkEnterForm.Designer.cs">
+      <DependentUpon>WorkEnterForm.cs</DependentUpon>
+    </Compile>
     <EmbeddedResource Include="Calendar.resx">
       <DependentUpon>Calendar.cs</DependentUpon>
     </EmbeddedResource>
@@ -83,6 +89,9 @@
     </Compile>
     <EmbeddedResource Include="TestForm.resx">
       <DependentUpon>TestForm.cs</DependentUpon>
+    </EmbeddedResource>
+    <EmbeddedResource Include="WorkEnterForm.resx">
+      <DependentUpon>WorkEnterForm.cs</DependentUpon>
     </EmbeddedResource>
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>

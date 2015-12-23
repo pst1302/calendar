@@ -11,6 +11,14 @@ using System.Windows.Forms;
 namespace CalanderTest
 {
 
+    public enum WorkType
+    {
+        Working,            // 근무 함
+        NotWorking,         // 근무 안함
+        incompleteWorking   // 부분 근무
+
+    }
+
     public class CalenderEx : System.Windows.Forms.Panel
     {
         private DatePanel[] Dates;
@@ -48,6 +56,12 @@ namespace CalanderTest
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.UserPaint, true);
 
+            this.Resize += CalenderEx_Resize;
+        }
+
+        private void CalenderEx_Resize(object sender, EventArgs e)
+        {
+            System.Diagnostics.Debug.WriteLine("resize 호출!!");
         }
 
         #region public 함수
@@ -236,6 +250,12 @@ namespace CalanderTest
         public delegate void DateClick(DateTime date);
 
         public bool isSelect;
+        public bool haveData;
+
+        private int workTime;
+        private WorkType workType;
+        private string workTypeString;
+        private string note;
 
         // String을 그리기 위한 도구들
         Brush brush;
@@ -247,9 +267,10 @@ namespace CalanderTest
 
         public DatePanel(DateTime time) : base()
         {
-            //this.BackColor = Color.White;
+            //System.Diagnostics.Debug.WriteLine(dt.Day +"일 생성자 호출됨");
 
             isSelect = false;
+            haveData = false;
 
             this.dt = time;
             brush = new SolidBrush(Color.Black);
@@ -257,13 +278,16 @@ namespace CalanderTest
             stringFont = new Font("새굴림", 9);
             pen = new Pen(brush);
 
+            workType = WorkType.NotWorking;
+            workTime = 0;
+            note = null;
+            
             this.SetStyle(ControlStyles.DoubleBuffer, true);
             this.SetStyle(ControlStyles.ResizeRedraw, true);
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.UserPaint, true);
 
             this.Click += DatePanel_Click;
-
         }
 
         private void DatePanel_Click(object sender, EventArgs e)
@@ -303,15 +327,55 @@ namespace CalanderTest
             e.Graphics.DrawLine(pen, new Point(1, 1), new Point(1, this.Height -1));
             e.Graphics.DrawLine(pen, new Point(this.Width - 1, 1), new Point(this.Width - 1, this.Height -1));
             e.Graphics.DrawLine(pen, new Point(1,this.Height - 1), new Point(this.Width - 1, this.Height - 1));
-            /*
-            // 날짜 내부의 String과 아이콘들 그림
-            e.Graphics.FillRectangle(new SolidBrush(Color.Red), new Rectangle(new Point(Width / 4, Height / 4), new Size(5, 5)));
-            pen.Color = Color.Blue;
-            e.Graphics.FillRectangle(new SolidBrush(Color.Blue), new Rectangle(new Point(Width / 4, (Height / 4) * 2), new Size(5, 5)));
-            pen.Color = Color.Black;
-            e.Graphics.FillRectangle(new SolidBrush(Color.Black), new Rectangle(new Point(Width / 4, (Height / 4) * 3), new Size(5, 5)));
-            */
+
+            if (haveData)
+            {
+                // 날짜 내부의 String과 아이콘들 그림
+                e.Graphics.FillRectangle(new SolidBrush(Color.Red), new Rectangle(new Point(Width / 4, Height / 4), new Size(5, 5)));
+                e.Graphics.DrawString(workTypeString, font, brush, new Point((Width / 4) + 7, (Height / 4) - 5));
+
+                pen.Color = Color.Blue;
+                e.Graphics.FillRectangle(new SolidBrush(Color.Blue), new Rectangle(new Point(Width / 4, (Height / 4) * 2), new Size(5, 5)));
+                e.Graphics.DrawString(workTime.ToString() + "시간",
+                    font, brush, new Point((Width / 4) + 7, ((Height / 4) * 2) - 5));
+                pen.Color = Color.Black;
+                e.Graphics.FillRectangle(new SolidBrush(Color.Black), new Rectangle(new Point(Width / 4, (Height / 4) * 3), new Size(5, 5)));
+                e.Graphics.DrawString(note, font, brush, new Point((Width / 4) + 7, ((Height / 4) * 3) - 5));
+            }
+            //System.Diagnostics.Debug.WriteLine();
             base.OnPaint(e);
+        }
+
+        // 일을 추가함
+        public void AddWork(WorkType type, int workTime, string note)
+        {
+            workType = type;
+            setStringByWorkType(workType);
+
+            this.workTime = workTime;
+            this.note = note;
+
+            haveData = true;
+
+            Invalidate();
+        }
+
+        private void setStringByWorkType(WorkType workType)
+        {
+            switch(workType)
+            {
+                case WorkType.Working:
+
+                    workTypeString = "근무";
+                    break;
+                case WorkType.NotWorking:
+                    workTypeString = "미 근무";
+                    break;
+                case WorkType.incompleteWorking:
+                    workTypeString = "부분 근무";
+                    break;
+
+            }
         }
     }
 
