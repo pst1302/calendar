@@ -46,7 +46,12 @@ namespace CalanderTest
         float fontSize;
 
         public delegate void DateClick(DateTime date);
+        public delegate void AddMonthClick();
+        public delegate void ReduceMonthClick();
+
         public DateClick DateClickEvent;
+        public AddMonthClick addMonthClick;
+        public ReduceMonthClick reduceMonthClick;
 
         public CalenderEx() : base()
         {
@@ -63,14 +68,6 @@ namespace CalanderTest
             this.SetStyle(ControlStyles.ResizeRedraw, true);
             this.SetStyle(ControlStyles.AllPaintingInWmPaint, true);
             this.SetStyle(ControlStyles.UserPaint, true);
-
-            this.Resize += CalenderEx_Resize;
-        }
-
-        private void CalenderEx_Resize(object sender, EventArgs e)
-        {
-            System.Diagnostics.Debug.WriteLine("resize 호출!!");
-            
         }
 
         #region public 함수
@@ -79,6 +76,12 @@ namespace CalanderTest
         {
             Dates = null;
             curDate = curDate.AddMonths(1);
+
+            if (addMonthClick != null)
+            {
+                addMonthClick();
+            }
+
             Invalidate();
         }
 
@@ -86,13 +89,24 @@ namespace CalanderTest
         {
             Dates = null;
             curDate = curDate.AddMonths(-1);
+
+            if (reduceMonthClick != null)
+            {
+                reduceMonthClick();
+            }
+
             Invalidate();
         }
 
         public void DateClickListener(DateTime dt)
         {
-            DateClickEvent(dt);
+            if (DateClickEvent != null)
+            {
+                DateClickEvent(dt);
+
+            }
         }
+
         #endregion
 
 

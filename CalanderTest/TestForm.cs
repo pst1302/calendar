@@ -23,8 +23,26 @@ namespace CalanderTest
             InitializeComponent();
             wef = new WorkEnterForm();
 
-            
+            // Date 클릭에 대한 함수 추가 부분
             calenderEx1.DateClickEvent += dtClickEvent;
+
+            // 다음달로 이동할때 추가할 작업 수행 예시
+            calenderEx1.addMonthClick += AddMonthEvent;
+
+            // 이전달로 이동할때 추가할 작업 수행 예시
+            calenderEx1.reduceMonthClick += reduceMonthEvent;
+
+
+        }
+
+        private void AddMonthEvent()
+        {
+            MessageBox.Show("다음달!");
+        }
+
+        private void reduceMonthEvent()
+        {
+            MessageBox.Show("이전달!");
         }
 
         private void dtClickEvent(DateTime dt)
