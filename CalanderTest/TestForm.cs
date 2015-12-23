@@ -53,7 +53,7 @@ namespace CalanderTest
 
         private void button3_Click(object sender, EventArgs e)
         {
-            for(int i = 0;i < 31; i++)
+            for(int i = 0;i < calenderEx1.Controls.Count; i++)
             {
                 ((DatePanel)calenderEx1.Controls[i]).AddWork(WorkType.Working,
                 6,

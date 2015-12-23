@@ -19,9 +19,17 @@ namespace CalanderTest
 
     }
 
+    public class WorkInfo
+    {
+        public WorkType workType;
+        public int workTime;
+        public string note;
+    }
+
     public class CalenderEx : System.Windows.Forms.Panel
     {
         private DatePanel[] Dates;
+        private DatePanel[] tempDates;
 
         private DateTime curDate; 
         
@@ -62,21 +70,22 @@ namespace CalanderTest
         private void CalenderEx_Resize(object sender, EventArgs e)
         {
             System.Diagnostics.Debug.WriteLine("resize 호출!!");
+            
         }
 
         #region public 함수
 
         public void AddMonth()
         {
+            Dates = null;
             curDate = curDate.AddMonths(1);
-            Debug.WriteLine(curDate.Date);
             Invalidate();
         }
 
         public void reduceMonth()
         {
+            Dates = null;
             curDate = curDate.AddMonths(-1);
-            Debug.WriteLine(curDate.Date);
             Invalidate();
         }
 
@@ -94,6 +103,7 @@ namespace CalanderTest
 
             // 여기서 그림
             Debug.WriteLine("onPaint Called!");
+
             Controls.Clear();
 
             UpperMargin = Height / 5;
@@ -102,7 +112,10 @@ namespace CalanderTest
             DrawingX = 0;
             DrawingY = UpperMargin;
 
-            Dates = new DatePanel[new DateTime(curDate.Year,curDate.Month,1).AddMonths(1).AddDays(-1).Day];
+            if (Dates == null)
+            {
+                Dates = new DatePanel[new DateTime(curDate.Year, curDate.Month, 1).AddMonths(1).AddDays(-1).Day];
+            }
 
             int LineHeight = calculateHeight();
 
@@ -117,10 +130,13 @@ namespace CalanderTest
             // 날짜 칸 생성
             for (int i = 0;i < Dates.Length; i++)
             {
-                Dates[i] = new DatePanel(new DateTime(curDate.Year, curDate.Month, i+1));
+                if (Dates[i] == null)
+                {
+                    Dates[i] = new DatePanel(new DateTime(curDate.Year, curDate.Month, i + 1));
+                }
                 AddDate(Dates[i]);
-            }
 
+            }
             base.OnPaint(e);
         }
 
@@ -252,10 +268,10 @@ namespace CalanderTest
         public bool isSelect;
         public bool haveData;
 
-        private int workTime;
-        private WorkType workType;
+        public int workTime;
+        public WorkType workType;
         private string workTypeString;
-        private string note;
+        public string note;
 
         // String을 그리기 위한 도구들
         Brush brush;
